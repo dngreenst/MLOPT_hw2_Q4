@@ -3,7 +3,7 @@ import numpy as np
 
 class RankProjectionAlg:
 
-    def __init__(self, x0: np.array, data_set: np.array, n: int, m: int, rank: int):
+    def __init__(self, x0: np.array, data_set: np.array, n: int, m: int, rank: int, epsilon: float):
         self.x_t = x0
         self.t = 0
         self.n = n
@@ -12,6 +12,9 @@ class RankProjectionAlg:
         self.rank = rank
 
         self.list_of_tuples = data_set.tolist()
+
+        self.epsilon = epsilon
+
         one_dimensional_data_set = []
         for entry in self.list_of_tuples:
             _, _, score = entry
@@ -31,7 +34,7 @@ class RankProjectionAlg:
 
         return gradient
 
-    def projection(self, vec: np.array) -> np.array:
+    def project(self, vec: np.array) -> np.array:
         u, s, vh = np.linalg.svd(vec)
 
         # TODO validate that this is non negative and does what is expected
@@ -42,8 +45,11 @@ class RankProjectionAlg:
 
         return (u * s) @ vh
 
-    def oracle(self, x_t) -> np.array:
-        gradient = self.gradient(x_t)
-        next_x_t = self.project(x_t - (1/self.beta) * gradient)
+    def solve_rank_projection(self):
 
-        return next_x_t
+        gradient = self.gradient(self.x_t)
+        while np.linalg.norm(gradient) > self.epsilon:
+            gradient = self.gradient(self.x_t)
+            self.x_t = self.project(x_t - (1/self.beta) * gradient)
+
+        return x_t

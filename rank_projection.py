@@ -3,7 +3,8 @@ import numpy as np
 
 class RankProjectionAlg:
 
-    def __init__(self, x0: np.array, data_set: np.array, n: int, m: int, rank: int, epsilon: float):
+    def __init__(self, x0: np.array, data_set: np.array, n: int, m: int, rank: int,
+                 epsilon: float):
         self.x_t = x0
         self.t = 0
         self.n = n

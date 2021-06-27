@@ -3,19 +3,13 @@ import numpy as np
 
 
 class FactorizedFormGradientDescent:
-    def __init__(self, v0: np.array, u0: np.array, data_set: np.array, n: int, m: int, rank: int,
-                 epsilon: float):
+    def __init__(self, v0: np.array, u0: np.array, data_set: np.array, rank: int):
         self.v_t = v0
         self.u_t = u0
-        self.t = 0
-        self.n = n
-        self.m = m
         self.data_set = data_set
         self.rank = rank
 
         self.list_of_tuples = data_set.tolist()
-
-        self.epsilon = epsilon
 
         one_dimensional_data_set = []
         for entry in self.list_of_tuples:

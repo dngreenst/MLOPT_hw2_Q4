@@ -5,13 +5,9 @@ import numpy as np
 
 class ConditionalGradient:
 
-    def __init__(self, x0: np.array, data_set: np.array, n: int, m: int, rank: int,
-                 tau: float):
+    def __init__(self, x0: np.array, data_set: np.array, tau: float):
         self.x_t = x0
-        self.n = n
-        self.m = m
         self.data_set = data_set
-        self.rank = rank
 
         self.list_of_tuples = data_set.tolist()
 

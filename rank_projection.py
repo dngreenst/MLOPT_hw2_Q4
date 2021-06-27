@@ -25,25 +25,26 @@ class RankProjectionAlg:
         gradient = np.zeros_like(x_t)
 
         for i, j, val in self.list_of_tuples:
-            gradient[i, j] = x_t[i, j] - val
+            gradient[int(i), int(j)] = x_t[int(i), int(j)] - val
 
         return gradient
 
     def project(self, vec: np.array) -> np.array:
-        u, s, vh = np.linalg.svd(vec)
+        u, s, vh = np.linalg.svd(vec, full_matrices=False)
 
         # TODO validate that this is non negative and does what is expected
         s_list = s.tolist()
-        s_list[self.rank + 1:] = 0.0
+        for i in range(self.rank + 1, len(s_list)):
+            s_list[i] = 0.0
 
-        s = np.array(s)
+        s = np.array(s_list)
 
-        return (u * s) @ vh
+        return u @ np.diag(s) @ vh
 
     def solve_rank_projection(self, iterations_num: int):
 
         for _ in range(iterations_num):
             gradient = self.gradient(self.x_t)
-            self.x_t = self.project(x_t - (1/self.beta) * gradient)
+            self.x_t = self.project(self.x_t - (1/self.beta) * gradient)
 
-        return x_t
+        return self.x_t

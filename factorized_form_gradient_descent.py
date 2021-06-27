@@ -26,7 +26,7 @@ class FactorizedFormGradientDescent:
         gradient = np.zeros_like(x_t)
 
         for i, j, val in self.list_of_tuples:
-            gradient[i, j] = x_t[i, j] - val
+            gradient[int(i), int(j)] = x_t[int(i), int(j)] - val
 
         return gradient
 
@@ -38,7 +38,7 @@ class FactorizedFormGradientDescent:
     def gradient_v(self, u_t: np.array, v_t: np.array) -> np.array:
 
         common_gradient_part = self.gradient_common(u_t @ np.transpose(v_t))
-        return u_t @ common_gradient_part
+        return np.transpose(common_gradient_part) @ u_t
 
     def factorized_method_gradient_descent(self, iterations_num: int):
 

@@ -30,12 +30,12 @@ class ConditionalGradient:
         min_sample_val = np.infty
 
         for i,j,val in self.list_of_tuples:
-            abs_val = np.abs(x_t[i,j] - val)
+            abs_val = np.abs(x_t[int(i),int(j)] - val)
 
             if abs_val < min_abs_val:
                 min_abs_val = abs_val
-                i_min = i
-                j_min = j
+                i_min = int(i)
+                j_min = int(j)
                 min_sample_val = val
 
         return i_min, j_min, min_sample_val
@@ -54,7 +54,7 @@ class ConditionalGradient:
         gradient = np.zeros_like(x_t)
 
         for i, j, val in self.list_of_tuples:
-            gradient[i, j] = x_t[i, j] - val
+            gradient[int(i), int(j)] = x_t[int(i), int(j)] - val
 
         return gradient
 

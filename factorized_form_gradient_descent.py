@@ -46,25 +46,14 @@ class FactorizedFormGradientDescent:
         common_gradient_part = self.gradient_common(u_t @ np.transpose(v_t))
         return u_t @ common_gradient_part
 
-    def factorized_method_gradient_descent(self):
+    def factorized_method_gradient_descent(self, iterations_num: int):
 
-        gradient_u = self.gradient_u(u_t=self.u_t, v_t=self.v_t)
-        gradient_v = self.gradient_v(u_t=self.u_t, v_t=self.v_t)
-
-        joint_gradient = self.create_joint_gradient(gradient_u=gradient_u,
-                                                    gradient_v=gradient_v)
-
-        while np.linalg.norm(joint_gradient) > self.epsilon:
+        for _ in range(iterations_num):
             gradient_u = self.gradient_u(u_t=self.u_t, v_t=self.v_t)
             gradient_v = self.gradient_v(u_t=self.u_t, v_t=self.v_t)
-
-            joint_gradient = self.create_joint_gradient(gradient_u=gradient_u,
-                                                        gradient_v=gradient_v)
 
             self.u_t = self.u_t - (1/self.beta) * gradient_u
             self.v_t = self.v_t - (1/self.beta) * gradient_v
 
         return self.u_t @ np.transpose(self.v_t)
 
-    def create_joint_gradient(self, gradient_u: np.array, gradient_v: np.array) -> np.array:
-        return np.array(gradient_u.tolist().extend(gradient_v.tolist()))

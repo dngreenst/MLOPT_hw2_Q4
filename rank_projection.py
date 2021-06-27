@@ -46,10 +46,9 @@ class RankProjectionAlg:
 
         return (u * s) @ vh
 
-    def solve_rank_projection(self):
+    def solve_rank_projection(self, iterations_num: int):
 
-        gradient = self.gradient(self.x_t)
-        while np.linalg.norm(gradient) > self.epsilon:
+        for _ in range(iterations_num):
             gradient = self.gradient(self.x_t)
             self.x_t = self.project(x_t - (1/self.beta) * gradient)
 

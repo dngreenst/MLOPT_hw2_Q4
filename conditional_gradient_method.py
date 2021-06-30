@@ -44,8 +44,9 @@ class ConditionalGradient:
 
     def solve_conditional_gradient_sub_problem(self, x_t: np.array, gradient: np.array) -> np.array:
         # get maximal eigenvalue of gradient
-        w = np.linalg.eigvals(gradient)
-        max_eigenvalue = max(w)
+        u, s, vh = np.linalg.svd(gradient, full_matrices=False)
+        # w, _ = np.linalg.eig(gradient)
+        max_eigenvalue = max(s)
         epsilon = 0.1
 
         # build matrix A
@@ -59,8 +60,8 @@ class ConditionalGradient:
         A[m:n + m, m:n + m] = max_eigenvalue * (1 + epsilon) * np.eye(n)
 
         # solve w^T A w
-        w, P = np.eigh(A)
-        max_eigenvector = P[0]
+        w, P = np.linalg.eigh(A)
+        max_eigenvector = P[:,0]
 
         # u* = w[1:m]/||w[1:m]
         u = max_eigenvector[0:m] / np.linalg.norm(max_eigenvector[0:m])

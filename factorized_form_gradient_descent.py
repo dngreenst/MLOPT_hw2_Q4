@@ -1,6 +1,8 @@
 
 import numpy as np
 
+from evaluator import Evaluator
+
 
 class FactorizedFormGradientDescent:
     def __init__(self, v0: np.array, u0: np.array, data_set: np.array, rank: int):
@@ -40,14 +42,18 @@ class FactorizedFormGradientDescent:
         common_gradient_part = self.gradient_common(u_t @ np.transpose(v_t))
         return np.transpose(common_gradient_part) @ u_t
 
-    def factorized_method_gradient_descent(self, iterations_num: int):
+    def factorized_method_gradient_descent(self, iterations_num: int, evaluator: Evaluator):
 
-        for _ in range(iterations_num):
+        for t in range(iterations_num):
             gradient_u = self.gradient_u(u_t=self.u_t, v_t=self.v_t)
             gradient_v = self.gradient_v(u_t=self.u_t, v_t=self.v_t)
 
             self.u_t = self.u_t - (1/self.beta) * gradient_u
             self.v_t = self.v_t - (1/self.beta) * gradient_v
 
+            evaluator.evaluate(t, self.u_t @ np.transpose(self.v_t))
+
         return self.u_t @ np.transpose(self.v_t)
+
+
 

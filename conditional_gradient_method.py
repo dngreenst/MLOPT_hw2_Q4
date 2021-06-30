@@ -2,6 +2,8 @@ from typing import Tuple
 
 import numpy as np
 
+from evaluator import Evaluator
+
 
 class ConditionalGradient:
 
@@ -29,14 +31,15 @@ class ConditionalGradient:
         min_abs_val = np.infty
         min_sample_val = np.infty
 
-        for i,j,val in self.list_of_tuples:
-            abs_val = np.abs(x_t[int(i),int(j)] - val)
+        for i, j, val in self.list_of_tuples:
+            diff_val = x_t[int(i), int(j)] - val
+            abs_val = np.abs(x_t[int(i), int(j)] - val)
 
             if abs_val < min_abs_val:
                 min_abs_val = abs_val
                 i_min = int(i)
                 j_min = int(j)
-                min_sample_val = val
+                min_sample_val = diff_val
 
         return i_min, j_min, min_sample_val
 
@@ -45,10 +48,9 @@ class ConditionalGradient:
 
         v_t = np.zeros_like(x_t)
 
-        v_t[i_min, j_min] = -np.sign(min_sample_val) * np.sqrt(self.tau)
+        v_t[i_min, j_min] = -np.sign(min_sample_val) * self.tau
 
         return v_t
-
 
     def gradient(self, x_t) -> np.array:
         gradient = np.zeros_like(x_t)
@@ -58,7 +60,7 @@ class ConditionalGradient:
 
         return gradient
 
-    def conditional_gradient_method(self, iterations_num: int) -> np.array:
+    def conditional_gradient_method(self, iterations_num: int, evaluator: Evaluator) -> np.array:
 
         for t in range(1, iterations_num + 1):
             eta_t = 2 / (t + 1)
@@ -67,8 +69,14 @@ class ConditionalGradient:
 
             v_t = self.solve_conditional_gradient_sub_problem(x_t=self.x_t, gradient=gradient)
 
-            self.x_t = self.x_t - eta_t * (v_t - self.x_t)
+            self.x_t = self.x_t + eta_t * (v_t - self.x_t)
+
+            evaluator.evaluate(t-1, self.x_t)
 
         return self.x_t
 
-
+    def evaluate_score(self) -> float:
+        running_sum = 0.0
+        for i, j, val in self.list_of_tuples:
+            running_sum += np.power(self.x_t[int(i), int(j)] - val, 2)
+        return running_sum

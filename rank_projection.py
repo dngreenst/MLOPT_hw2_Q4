@@ -1,5 +1,7 @@
 import numpy as np
 
+from evaluator import Evaluator
+
 
 class RankProjectionAlg:
 
@@ -41,10 +43,10 @@ class RankProjectionAlg:
 
         return u @ np.diag(s) @ vh
 
-    def solve_rank_projection(self, iterations_num: int):
+    def solve_rank_projection(self, iterations_num: int, evaluator: Evaluator):
 
-        for _ in range(iterations_num):
+        for t in range(iterations_num):
             gradient = self.gradient(self.x_t)
             self.x_t = self.project(self.x_t - (1/self.beta) * gradient)
-
+            evaluator.evaluate(t, self.x_t)
         return self.x_t

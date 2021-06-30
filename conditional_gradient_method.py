@@ -1,7 +1,6 @@
 from typing import Tuple
 
 import numpy as np
-
 from evaluator import Evaluator
 
 
@@ -44,11 +43,32 @@ class ConditionalGradient:
         return i_min, j_min, min_sample_val
 
     def solve_conditional_gradient_sub_problem(self, x_t: np.array, gradient: np.array) -> np.array:
-        i_min, j_min, min_sample_val = self.find_min_i_j(x_t=x_t)
+        # get maximal eigenvalue of gradient
+        w = np.linalg.eigvals(gradient)
+        max_eigenvalue = max(w)
+        epsilon = 0.1
 
-        v_t = np.zeros_like(x_t)
+        # build matrix A
+        m, n = gradient.shape
 
-        v_t[i_min, j_min] = -np.sign(min_sample_val) * self.tau
+        A = np.zeros((n + m, n + m))
+
+        A[0:m, 0:m] = max_eigenvalue * (1 + epsilon) * np.eye(m)
+        A[0:m, m:m + n] = -gradient
+        A[m:m + n, 0:m] = -np.transpose(gradient)
+        A[m:n + m, m:n + m] = max_eigenvalue * (1 + epsilon) * np.eye(n)
+
+        # solve w^T A w
+        w, P = np.eigh(A)
+        max_eigenvector = P[0]
+
+        # u* = w[1:m]/||w[1:m]
+        u = max_eigenvector[0:m] / np.linalg.norm(max_eigenvector[0:m])
+        # v* = w[m+1:]/||w[m+1:]
+        v = max_eigenvector[m:] / np.linalg.norm(max_eigenvector[m:])
+
+
+        v_t = self.tau * np.outer(u, v)
 
         return v_t
 
@@ -71,7 +91,7 @@ class ConditionalGradient:
 
             self.x_t = self.x_t + eta_t * (v_t - self.x_t)
 
-            evaluator.evaluate(t-1, self.x_t)
+            evaluator.evaluate(t - 1, self.x_t)
 
         return self.x_t
 

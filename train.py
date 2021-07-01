@@ -27,13 +27,13 @@ def main():
 
     test_methods_on_data_set(data, test_set, training_set)
 
-    # ml_1m_data = os.path.join(curr_directory, 'ml-1m', 'ratings.dat')
+    ml_1m_data = os.path.join(curr_directory, 'ml-1m', 'ratings.dat')
 
-    # data = DataReader.read(ml_1m_data, delimiter='::')
+    data = DataReader.read(ml_1m_data, delimiter='::')
 
-    # training_set, test_set = partition_data.split(data_set=data, test_fraction=1 / 3)
+    training_set, test_set = partition_data.split(data_set=data, test_fraction=1 / 3)
 
-    # test_methods_on_data_set(data, test_set, training_set)
+    test_methods_on_data_set(data, test_set, training_set)
 
 
 def test_methods_on_data_set(data, test_set, training_set):
@@ -47,17 +47,17 @@ def test_methods_on_data_set(data, test_set, training_set):
     # x0 = np.random.normal(size=(max_m + 1, max_n + 1))
     # x0 = np.zeros((max_m + 1, max_n + 1))
     rank = 5
-    tau = rank
+    tau = 3000
     # x0 = (x0 / np.trace(x0)) * tau
     u0 = np.random.normal(size=(max_m + 1, rank))
     v0 = np.random.normal(size=(max_n + 1, rank))
     u_prime = u0[:,0] / np.linalg.norm(u0[:,0])
     v_prime = v0[:,0] / np.linalg.norm(v0[:,0])
-    x0 = np.outer(u_prime, v_prime)
-    rank_projection_solver = RankProjectionAlg(x0=x0, rank=rank, data_set=training_set)
+    x0 = tau * np.outer(u_prime, v_prime)
+    rank_projection_solver = RankProjectionAlg(x0=u0 @ np.transpose(v0), rank=rank, data_set=training_set)
     factorized_solver = FactorizedFormGradientDescent(u0=u0, v0=v0, rank=rank, data_set=training_set)
     conditional_gradient_solver = ConditionalGradient(x0=x0, data_set=training_set, tau=tau)
-    iterations_num = 10
+    iterations_num = 100
     factorized_eval = Evaluator(test_set, iterations_num)
     conditional_gradient_eval = Evaluator(test_set, iterations_num)
     rank_projection_eval = Evaluator(test_set, iterations_num)

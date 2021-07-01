@@ -44,16 +44,20 @@ def test_methods_on_data_set(data, test_set, training_set):
             max_m = int(i)
         if j > max_n:
             max_n = int(j)
-    x0 = np.random.normal(size=(max_m + 1, max_n + 1))
-    rank = 12
+    # x0 = np.random.normal(size=(max_m + 1, max_n + 1))
+    # x0 = np.zeros((max_m + 1, max_n + 1))
+    rank = 5
     tau = rank
-    x0 = (x0 / np.trace(x0)) * tau
+    # x0 = (x0 / np.trace(x0)) * tau
     u0 = np.random.normal(size=(max_m + 1, rank))
     v0 = np.random.normal(size=(max_n + 1, rank))
+    u_prime = u0[:,0] / np.linalg.norm(u0[:,0])
+    v_prime = v0[:,0] / np.linalg.norm(v0[:,0])
+    x0 = np.outer(u_prime, v_prime)
     rank_projection_solver = RankProjectionAlg(x0=x0, rank=rank, data_set=training_set)
     factorized_solver = FactorizedFormGradientDescent(u0=u0, v0=v0, rank=rank, data_set=training_set)
     conditional_gradient_solver = ConditionalGradient(x0=x0, data_set=training_set, tau=tau)
-    iterations_num = 100
+    iterations_num = 10
     factorized_eval = Evaluator(test_set, iterations_num)
     conditional_gradient_eval = Evaluator(test_set, iterations_num)
     rank_projection_eval = Evaluator(test_set, iterations_num)
@@ -62,6 +66,7 @@ def test_methods_on_data_set(data, test_set, training_set):
     try:
         rank_projection_solution = rank_projection_solver.solve_rank_projection(iterations_num=iterations_num,
                                                                                 evaluator=rank_projection_eval)
+        # rank_projection_solution = None
     except Exception as ex:
         rank_projection_solution = None
         print(f'rank_projection_solver failed with exception: \n{ex}')

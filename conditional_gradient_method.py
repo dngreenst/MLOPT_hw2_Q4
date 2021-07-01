@@ -1,6 +1,7 @@
 from typing import Tuple
 
 import numpy as np
+
 from evaluator import Evaluator
 
 
@@ -42,11 +43,26 @@ class ConditionalGradient:
 
         return i_min, j_min, min_sample_val
 
+    def get_max_eigenvector(self, A: np.array) -> np.array:
+        w = np.random.normal(size=A.shape[1])
+        T = 20
+
+        for _ in range(T):
+            new_W_prime = A @ w
+            w = (new_W_prime) / np.linalg.norm(new_W_prime)
+
+        return w
+
+    def get_max_singular_value(self, A: np.array) -> float:
+        max_eigenvector = self.get_max_eigenvector(A.T @ A)
+        return np.sqrt(np.linalg.norm(A.T @ A @ max_eigenvector))
+
     def solve_conditional_gradient_sub_problem(self, x_t: np.array, gradient: np.array) -> np.array:
         # get maximal eigenvalue of gradient
-        u, s, vh = np.linalg.svd(gradient, full_matrices=False)
-        # w, _ = np.linalg.eig(gradient)
-        max_eigenvalue = max(s)
+        max_eigenvalue = self.get_max_singular_value(gradient)
+        # u, s, vh = np.linalg.svd(gradient, full_matrices=False)
+        # # w, _ = np.linalg.eig(gradient)
+        # max_eigenvalue = max(s)
         epsilon = 0.1
 
         # build matrix A
@@ -60,14 +76,14 @@ class ConditionalGradient:
         A[m:n + m, m:n + m] = max_eigenvalue * (1 + epsilon) * np.eye(n)
 
         # solve w^T A w
-        w, P = np.linalg.eigh(A)
-        max_eigenvector = P[:,0]
+        # w, P = np.linalg.eigh(A)
+        max_eigenvector = self.get_max_eigenvector(A)
+        # max_eigenvector2 = P[:,-1]
 
         # u* = w[1:m]/||w[1:m]
         u = max_eigenvector[0:m] / np.linalg.norm(max_eigenvector[0:m])
         # v* = w[m+1:]/||w[m+1:]
         v = max_eigenvector[m:] / np.linalg.norm(max_eigenvector[m:])
-
 
         v_t = self.tau * np.outer(u, v)
 
